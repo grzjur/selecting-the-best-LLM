@@ -1,4 +1,4 @@
-# selecting the best LLM
+# Selecting the best LLM
 
 This project provides a framework for comparing different Large Language Models (LLMs) and selecting the most suitable one for a specific use case. It automatically generates questions, collects answers from different models, and evaluates which model performs best.
 
