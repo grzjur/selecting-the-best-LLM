@@ -26,7 +26,7 @@ async def ask_question(model):
             system_prompt=system_prompt_ask
         )
         result = await agentAsk.run("Create a question. Remember to include the question between tags <question>...</question>")
-        question = extract_between_tags(result.data, "<question>", "</question>")
+        question = extract_between_tags(result.output, "<question>", "</question>")
         return question
     except Exception as e:
         print(e)
@@ -52,7 +52,7 @@ async def answer_question(model, question):
         start = time.time()
         result = await agentAnswer.run(question)
         end = time.time()
-        answer = extract_between_tags(result.data, "<answer>", "</answer>")
+        answer = extract_between_tags(result.output, "<answer>", "</answer>")
         return Answer(model=model, question=question, answer=answer, speed=end-start)
     except Exception as e:
         print(e)
@@ -99,7 +99,7 @@ async def choose_the_best_answer(model: str, question: str, answers: List[Answer
 
         user_prompt = '\n\n'.join([f"<answer_{i+1}>{item.answer}</answer_{i+1}>" for i, item in enumerate(answers)])
         result = await agentRate.run(user_prompt) 
-        best_str = extract_between_tags(result.data, "<the_best>", "</the_best>")
+        best_str = extract_between_tags(result.output, "<the_best>", "</the_best>")
         if best_str.isdigit():
             best = int(best_str)
             if 0 < best <= len(answers):
