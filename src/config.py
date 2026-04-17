@@ -1,4 +1,6 @@
 from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.providers.ollama import OllamaProvider
 from functools import lru_cache
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
@@ -12,14 +14,12 @@ load_dotenv()
 class Config(BaseSettings):
 
     MODELS: list[Any] = [
-        # "claude-3-7-sonnet-20250219",
-        # "deepseek:deepseek-reasoner",
-        # "gemini-2.0-flash",
-        # "xai:grok-2-latest",
-        # "groq:llama-3.3-70b-versatile",
+        # "groq:qwen/qwen3-32b",
+        # "groq:openai/gpt-oss-120b",
         # "openai:gpt-4o",
         # "openai:o3-mini",
-
+        # "xai:grok-4.20",
+        # "ollama:gemma4:e4b",
     ]
 
     INTENDED: str = "Customer Support"
@@ -40,6 +40,7 @@ class Config(BaseSettings):
     XAI_BASE_URL: str | None = "https://api.x.ai/v1"
     DEEPSEEK_API_KEY: str | None = None
     DEEPSEEK_BASE_URL: str | None = "https://api.deepseek.com"
+    OLLAMA_API_KEY: str | None = None
     OLLAMA_BASE_URL: str | None = "http://localhost:11434/v1"
 
     def __init__(self, **kwargs):
@@ -58,19 +59,18 @@ class Config(BaseSettings):
             case 'deepseek':
                 return OpenAIModel(
                     model_name=model_name,
-                    base_url=self.DEEPSEEK_BASE_URL,
-                    api_key=self.DEEPSEEK_API_KEY
+                    provider=OpenAIProvider(base_url=self.DEEPSEEK_BASE_URL, api_key=self.DEEPSEEK_API_KEY)
                 )
             case 'ollama':
+                base_url = "https://ollama.com/v1" if self.OLLAMA_API_KEY else self.OLLAMA_BASE_URL
                 return OpenAIModel(
                     model_name=model_name,
-                    base_url=self.OLLAMA_BASE_URL
+                    provider=OllamaProvider(base_url=base_url, api_key=self.OLLAMA_API_KEY or 'ollama')
                 )
             case 'xai':
                 return OpenAIModel(
                     model_name=model_name,
-                    base_url=self.XAI_BASE_URL,
-                    api_key=self.XAI_API_KEY
+                    provider=OpenAIProvider(base_url=self.XAI_BASE_URL, api_key=self.XAI_API_KEY)
                 )
             
         return model
